@@ -10,9 +10,12 @@
 Control de hilos con wait/notify. Productor/consumidor.
 
 1. Revise el funcionamiento del programa y ejecútelo. Mientras esto ocurren, ejecute jVisualVM y revise el consumo de CPU del proceso correspondiente. A qué se debe este consumo?, cual es la clase responsable?
+* Rta1: El consumo de CPU se debe a que el programa nunca se de tiene a pesar de que la lista pueda estar vacio
+* Rta2: Tanto consumer como producer tiene la culpa. Producer por no tener tener limite de agregación a la cola y consumer tambien por no tener limite al sacar de la cola y que al usar poll() sigue sacando numeros a pesar de que la cola pueda estar vacia.
 2. Haga los ajustes necesarios para que la solución use más eficientemente la CPU, teniendo en cuenta que -por ahora- la producción es lenta y el consumo es rápido. Verifique con JVisualVM que el consumo de CPU se reduzca.
+* Se añadió un sleep en la clase de consumidor para que no se desbordara al momento de seguir pidiendo items de cola aún cuando no habian
 3. Haga que ahora el productor produzca muy rápido, y el consumidor consuma lento. Teniendo en cuenta que el productor conoce un límite de Stock (cuantos elementos debería tener, a lo sumo en la cola), haga que dicho límite se respete. Revise el API de la colección usada como cola para ver cómo garantizar que dicho límite no se supere. Verifique que, al poner un límite pequeño para el 'stock', no haya consumo alto de CPU ni errores.
-
+* Para que el productor sea mas rapido se le redujo el tiempo en el que permanece dormido y se le añadieron las condiciones de sotck limite
 
 ##### Parte II. – Antes de terminar la clase.
 
