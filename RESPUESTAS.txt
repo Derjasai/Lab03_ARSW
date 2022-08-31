@@ -3,3 +3,4 @@ Punto III
 3. El invariante no se cumple, puesto que la función de pause and check cada vez va mostrando un número mas grande.
 5. El invariante aún no se cumple puesto que la vida total sigue modificandose.
 9. Para los casos grandes el invariante se sigue manteniendo
+10. Se puede generar una condición de carrera si un hilo elimina un inmortal al momento de que otro hilo esta consultado la lista de inmortales.
