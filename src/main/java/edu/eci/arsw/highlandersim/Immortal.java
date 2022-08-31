@@ -2,13 +2,14 @@ package edu.eci.arsw.highlandersim;
 
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class Immortal extends Thread {
 
     private ImmortalUpdateReportCallback updateCallback=null;
-    
-    private int health;
-    
+
+    private AtomicInteger health;
+
     private int defaultDamageValue;
 
     private final List<Immortal> immortalsPopulation;
@@ -17,33 +18,44 @@ public class Immortal extends Thread {
 
     private final Random r = new Random(System.currentTimeMillis());
 
+    private boolean pause = false;
 
-    public Immortal(String name, List<Immortal> immortalsPopulation, int health, int defaultDamageValue, ImmortalUpdateReportCallback ucb) {
+    private int posi;
+
+    private boolean isDead = false;
+
+
+    public Immortal(String name, List<Immortal> immortalsPopulation, int health, int defaultDamageValue, ImmortalUpdateReportCallback ucb, int n) {
         super(name);
         this.updateCallback=ucb;
         this.name = name;
         this.immortalsPopulation = immortalsPopulation;
-        this.health = health;
+        this.health = new AtomicInteger(health);
         this.defaultDamageValue=defaultDamageValue;
+        this.posi = n;
     }
 
     public void run() {
 
-        while (true) {
+        while (!isDead) {
             Immortal im;
 
-            int myIndex = immortalsPopulation.indexOf(this);
+                int myIndex = immortalsPopulation.indexOf(this);
 
-            int nextFighterIndex = r.nextInt(immortalsPopulation.size());
+                int nextFighterIndex = r.nextInt(immortalsPopulation.size());
 
-            //avoid self-fight
-            if (nextFighterIndex == myIndex) {
-                nextFighterIndex = ((nextFighterIndex + 1) % immortalsPopulation.size());
-            }
+                //avoid self-fight
+                if (nextFighterIndex == myIndex) {
+                    nextFighterIndex = ((nextFighterIndex + 1) % immortalsPopulation.size());
+                }
 
-            im = immortalsPopulation.get(nextFighterIndex);
+                im = immortalsPopulation.get(nextFighterIndex);
 
-            this.fight(im);
+
+                    this.fight(im);
+
+
+
 
             try {
                 Thread.sleep(1);
@@ -51,28 +63,69 @@ public class Immortal extends Thread {
                 e.printStackTrace();
             }
 
+            if (pause) {
+                synchronized (im) {
+                    try {
+                        im.wait();
+                        pause = false;
+                    } catch (InterruptedException e) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                    }
+                }
+            }
+
         }
 
     }
 
     public void fight(Immortal i2) {
-
-        if (i2.getHealth() > 0) {
-            i2.changeHealth(i2.getHealth() - defaultDamageValue);
-            this.health += defaultDamageValue;
-            updateCallback.processReport("Fight: " + this + " vs " + i2+"\n");
-        } else {
-            updateCallback.processReport(this + " says:" + i2 + " is already dead!\n");
+        Immortal i1 = this;
+        if(i1.getPosi() > i2.getPosi()){
+            Immortal temp = i1;
+            i1 = i2;
+            i2 = temp;
         }
+        synchronized (i1) {
+            synchronized(i2){
+                if (i2.getHealth() > 0) {
+                    i2.changeHealth(i2.getHealth() - defaultDamageValue);
+                    health.addAndGet(defaultDamageValue);
 
+                    updateCallback.processReport("Fight: " + this + " vs " + i2 + "\n");
+                } else {
+                    updateCallback.processReport(this + " says:" + i2 + " is already dead!\n");
+                }
+            }
+        }
+    }
+
+    public void pause(){
+        pause = true;
+    }
+
+    public synchronized void resumes(){
+        pause = false;
+        notifyAll();
+    }
+
+    public boolean isDead(){
+        return isDead;
     }
 
     public void changeHealth(int v) {
-        health = v;
+        health.set(v);
+        if (health.get() == 0){
+            isDead = true;
+        }
     }
 
     public int getHealth() {
-        return health;
+        return health.get();
+    }
+
+    public int getPosi(){
+        return posi;
     }
 
     @Override

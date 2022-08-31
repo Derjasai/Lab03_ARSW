@@ -1,0 +1,5 @@
+Punto III
+2. El invariante deberia ser la sumatoria de la vida de todos los jugadores, en este caso como tenemos N jugadores seria N*100 idealmente
+3. El invariante no se cumple, puesto que la función de pause and check cada vez va mostrando un número mas grande.
+5. El invariante aún no se cumple puesto que la vida total sigue modificandose.
+9. Para los casos grandes el invariante se sigue manteniendo

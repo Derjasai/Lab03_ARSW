@@ -69,32 +69,29 @@ public class HostBlackListsValidator {
 
         LinkedList<Integer> blackListOcurrences=new LinkedList<>();
         ArrayList<HostBlackListThread> hilos = new ArrayList<>();
+
         AtomicInteger ocurrencesCount = new AtomicInteger(0);
         HostBlacklistsDataSourceFacade skds=HostBlacklistsDataSourceFacade.getInstance();
         AtomicInteger checkedListsCount = new AtomicInteger(0);
+
         int cantidadListas = skds.getRegisteredServersCount()/n;
         int sobrante = skds.getRegisteredServersCount() % n;
 
         int ini = 0;
         int fin = 0;
-        for (int i = 0; i < n && ocurrencesCount.get() < BLACK_LIST_ALARM_COUNT; i++) {
-            if(i == n - 1){
-                fin = ini + cantidadListas + sobrante - 1;
-            }else{
-                fin = ini + cantidadListas - 1;
-            }
-//          fin += cantidadListas;
-            HostBlackListThread th = new HostBlackListThread(ini, fin , ipaddress);
+        for (int i = 0; i < n; i++) {
+            fin += cantidadListas;
+            HostBlackListThread th = new HostBlackListThread(ini, fin , ipaddress,checkedListsCount,ocurrencesCount);
+            ini = fin;
             hilos.add(th);
-            ini = fin + 1;
             th.start();
         }
-//
-//        if(sobrante > 0){
-//            HostBlackListThread th = new HostBlackListThread(ini, ini + sobrante , ipaddress);
-//            hilos.add(th);
-//            th.start();
-//        }
+
+        if(sobrante > 0){
+            HostBlackListThread th = new HostBlackListThread(ini, ini + sobrante , ipaddress,checkedListsCount,ocurrencesCount);
+            hilos.add(th);
+            th.start();
+        }
 
         for (HostBlackListThread host: hilos){
             try {
@@ -103,17 +100,9 @@ public class HostBlackListsValidator {
                 throw new RuntimeException(e);}
         }
 
-//        for (HostBlackListThread host: hilos){
-//            ocurrencesCount += host.getOcurrencesCount();
-//            checkedListsCount += host.getCheckedLists();
-//            blackListOcurrences.addAll(host.getBlackListOcurrence());
-//        }
-//        ocurrencesCount = hilos.get(0).getOcurrencesCount();
-//        checkedListsCount = hilos.get(0).getCheckedLists();
-//        for(Integer num:hilos.get(0).getBlackListOcurrence()){
-//            blackListOcurrences.add(num);
-//        }
-
+        for (HostBlackListThread host:hilos){
+            blackListOcurrences.addAll(host.getBlackListOcurrence());
+        }
 
         if (ocurrencesCount.get()>=BLACK_LIST_ALARM_COUNT){
             skds.reportAsNotTrustworthy(ipaddress);

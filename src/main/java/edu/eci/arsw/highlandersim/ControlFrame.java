@@ -91,14 +91,17 @@ public class ControlFrame extends JFrame {
                 /*
 				 * COMPLETAR
                  */
+                for(Immortal immortal : immortals){
+                    immortal.pause();
+                }
                 int sum = 0;
                 for (Immortal im : immortals) {
                     sum += im.getHealth();
                 }
 
                 statisticsLabel.setText("<html>"+immortals.toString()+"<br>Health sum:"+ sum);
-                
-                
+
+
 
             }
         });
@@ -111,6 +114,9 @@ public class ControlFrame extends JFrame {
                 /**
                  * IMPLEMENTAR
                  */
+                for(Immortal immortal : immortals){
+                    immortal.resumes();
+                }
 
             }
         });
@@ -135,8 +141,8 @@ public class ControlFrame extends JFrame {
         output = new JTextArea();
         output.setEditable(false);
         scrollPane.setViewportView(output);
-        
-        
+
+
         statisticsLabel = new JLabel("Immortals total health:");
         contentPane.add(statisticsLabel, BorderLayout.SOUTH);
 
@@ -145,14 +151,14 @@ public class ControlFrame extends JFrame {
     public List<Immortal> setupInmortals() {
 
         ImmortalUpdateReportCallback ucb=new TextAreaUpdateReportCallback(output,scrollPane);
-        
+
         try {
             int ni = Integer.parseInt(numOfImmortals.getText());
 
             List<Immortal> il = new LinkedList<Immortal>();
 
             for (int i = 0; i < ni; i++) {
-                Immortal i1 = new Immortal("im" + i, il, DEFAULT_IMMORTAL_HEALTH, DEFAULT_DAMAGE_VALUE,ucb);
+                Immortal i1 = new Immortal("im" + i, il, DEFAULT_IMMORTAL_HEALTH, DEFAULT_DAMAGE_VALUE,ucb,i);
                 il.add(i1);
             }
             return il;
@@ -173,8 +179,8 @@ class TextAreaUpdateReportCallback implements ImmortalUpdateReportCallback{
     public TextAreaUpdateReportCallback(JTextArea ta,JScrollPane jsp) {
         this.ta = ta;
         this.jsp=jsp;
-    }       
-    
+    }
+
     @Override
     public void processReport(String report) {
         ta.append(report);
@@ -189,5 +195,5 @@ class TextAreaUpdateReportCallback implements ImmortalUpdateReportCallback{
         );
 
     }
-    
+
 }
