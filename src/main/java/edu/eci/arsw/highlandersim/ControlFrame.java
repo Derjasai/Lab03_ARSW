@@ -127,7 +127,7 @@ public class ControlFrame extends JFrame {
         toolBar.add(lblNumOfImmortals);
 
         numOfImmortals = new JTextField();
-        numOfImmortals.setText("3");
+        numOfImmortals.setText("1000");
         toolBar.add(numOfImmortals);
         numOfImmortals.setColumns(10);
 
@@ -136,8 +136,10 @@ public class ControlFrame extends JFrame {
         btnStop.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                  for(Immortal immortal : immortals){
-                    immortal.isDead();
+                    immortal.kill();
                  }
+                JOptionPane.showMessageDialog(null,"Fue una gran batalla hasta la proxima");
+                 System.exit(0);
             }
         });
         toolBar.add(btnStop);

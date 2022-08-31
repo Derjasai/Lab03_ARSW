@@ -84,8 +84,8 @@ public class Immortal extends Thread {
             i1 = i2;
             i2 = temp;
         }
-        if (this.getHealth() <= 0) {
-            this.isDead();
+        if (isDead()) {
+            this.kill();
             immortalsPopulation.remove(this);
         }
         synchronized (i1) {
@@ -100,6 +100,7 @@ public class Immortal extends Thread {
                 }
             }
         }
+
     }
 
     public void pause() {
@@ -111,9 +112,11 @@ public class Immortal extends Thread {
         notifyAll();
     }
 
-    public void isDead() {
-        isDead = true;
+    public boolean isDead() {
+        return isDead;
     }
+
+    public void kill(){isDead=true;}
 
     public void changeHealth(int v) {
         health.set(v);
